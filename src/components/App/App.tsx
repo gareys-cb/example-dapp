@@ -1,14 +1,18 @@
 import "./App.css";
-import logo from "./padlock.png";
-import loggedInLogo from "./padlock_open.png";
 import { useCallback, useState } from "react";
-import { useWeb3 } from "./hooks/useWeb3/useWeb3";
-import { ProviderType } from "./utils/types";
+import logo from "../../assets/padlock.png";
+import loggedInLogo from "../../assets/padlock_open.png";
+import { provider, useWeb3 } from "../../hooks/useWeb3/useWeb3";
+import { ProviderType } from "../../utils/types";
+import { LoggedOut } from "../LoggedOut/LoggedOut";
+import { LoggedIn } from "../LoggedIn/LoggedIn";
 
 function App() {
   const { login, logout, account, web3, signMessage } = useWeb3();
   // Controls the UI loading state which shows/hides the contents of the app
-  const [loading, setLoading] = useState(true);
+  // We will attempt to login the user if the provider is set in localStorage
+  // Otherwise, we initialize it to false
+  const [loading, setLoading] = useState(!!provider);
   // If there is web3 state, we assume the user is logged in
   const loggedIn = !!web3;
 
@@ -49,28 +53,13 @@ function App() {
         <p>loading...</p>
       ) : (
         <div>
-          {!loggedIn && (
-            <div className="content">
-              <p>Sign in with your wallet</p>
-              <button type="button" onClick={() => handleLogin("walletlink")}>
-                Coinbase Wallet
-              </button>
-              <button type="button" onClick={() => handleLogin("metamask")}>
-                MetaMask Wallet
-              </button>
-            </div>
-          )}
+          {!loggedIn && <LoggedOut handleLogin={handleLogin} />}
           {loggedIn && (
-            <div className="content">
-              <p>Open Sesame!</p>
-              <small>Signed into account: {account}</small>
-              <button type="button" onClick={signMessage}>
-                Sign Message
-              </button>
-              <button className="signout" type="button" onClick={handleLogout}>
-                Sign out
-              </button>
-            </div>
+            <LoggedIn
+              handleLogout={handleLogout}
+              handleSignMessage={signMessage}
+              account={account}
+            />
           )}
         </div>
       )}

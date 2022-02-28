@@ -1,15 +1,12 @@
-import { MetaMaskInpageProvider } from "@metamask/providers";
-import { EthereumProvider } from "index";
 import Web3 from "web3";
+import { EthereumProvider, MetaMaskProvider } from "index";
 import { LoginReturnType } from "../../utils/types";
 
 export const loginMetaMask = async (): Promise<LoginReturnType> => {
-  const metamaskProvider: MetaMaskInpageProvider | undefined =
-    // TypeScript is complaining because the `providers` property on window.ethereum is unrecognized
+  const metamaskProvider: MetaMaskProvider | undefined =
     (
       (window.ethereum as EthereumProvider)?.providers as EthereumProvider[]
-    )?.find((p): p is MetaMaskInpageProvider => !!p.isMetaMask) ??
-    window.ethereum;
+    )?.find((p): p is MetaMaskProvider => !!p.isMetaMask) ?? window.ethereum;
   // If the user selected MetaMask to login
   // We make sure that the user has MetaMask installed in their browser
   if (!metamaskProvider || !metamaskProvider.isMetaMask || !window.ethereum) {

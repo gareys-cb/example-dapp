@@ -1,12 +1,12 @@
-import { CoinbaseWalletProvider, EthereumProvider } from "index";
-import WalletLink from "walletlink";
 import Web3 from "web3";
+import WalletLink from "walletlink";
+import { CoinbaseWalletProvider, EthereumProvider } from "index";
 import { LoginReturnType } from "../../utils/types";
 
 // Your Dapp's name
 const APP_NAME = "Sesame";
 // An image, hosted by you, that represents your dapp
-const APP_LOGO_URL = "http://localhost:3000/src/padlock.png";
+const APP_LOGO_URL = "http://localhost:3000/src/assets/padlock.png";
 // Get your infura api key by creating a free account at https://infura.io/
 const DEFAULT_ETH_JSONRPC_URL =
   "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID";
@@ -39,7 +39,6 @@ export const loginCoinbaseWallet = async (): Promise<LoginReturnType> => {
   try {
     // We try to find the Coinbase Wallet ethereum provider on the window.ethereum object
     const walletlinkProvider: CoinbaseWalletProvider | undefined =
-      // TypeScript is complaining because the `providers` property on window.ethereum is unrecognized
       (
         (window.ethereum as EthereumProvider)?.providers as EthereumProvider[]
       )?.find((p): p is CoinbaseWalletProvider => !!p.isCoinbaseWallet) ??

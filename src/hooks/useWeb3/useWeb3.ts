@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
 import Web3 from "web3";
+import { useCallback, useEffect, useState } from "react";
 import { ProviderType } from "../../utils/types";
 import { loginWallet } from "./loginWallet";
 
 // The localstorage key for the selected provider
 // If defined, value is either 'walletlink' or 'metamask'
 const LS_KEY = "web3-provider";
+// We check the localstorage key for the provider to see if it was set during a previous session
+export const provider = window.localStorage.getItem(LS_KEY) as ProviderType;
 
 export const useWeb3 = () => {
   // This is the logged in user's Web3 Instance for the selected wallet provider
@@ -75,9 +77,6 @@ export const useWeb3 = () => {
   // If the user was logged in, then closes the browser tab for this dapp or reloads this tab,
   // then this will put them back into an authenticated UI state.
   useEffect(() => {
-    // We check the localstorage key for the provider to see if it was set during a previous session
-    const provider = window.localStorage.getItem(LS_KEY) as ProviderType;
-
     // If there is no provider in localStorage, we can assume the user needs to login
     // via the login button. Otherwise...
     if (provider) {
@@ -133,11 +132,11 @@ export const useWeb3 = () => {
 
   const signMessage = useCallback(async () => {
     try {
-      if (!account) {
+      if (!account || !web3) {
         throw new Error("NO ACCOUNT AVAILABLE");
       }
       // This will send a request to the wallet provider to sign a message
-      const signature = await web3?.eth.personal.sign(
+      const signature = await web3.eth.personal.sign(
         `Open Sesame!`,
         account,
         ""
