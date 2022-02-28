@@ -9,11 +9,12 @@
       window.global = window;
     </script>
     <script type="module">
-      import process from "process";
       import { Buffer } from "buffer";
-
+      import process from "process";
+      import util from "util";
       window.Buffer = Buffer;
       window.process = process;
+      window.util = util;
     </script>
   </head>
   <body>
