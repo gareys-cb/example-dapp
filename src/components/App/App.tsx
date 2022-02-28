@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import logo from "../../assets/padlock.png";
 import loggedInLogo from "../../assets/padlock_open.png";
 import { providerString, useWeb3 } from "../../hooks/useWeb3/useWeb3";
@@ -15,6 +15,10 @@ function App() {
   const [loading, setLoading] = useState(!!providerString);
   // If there is web3 state, we assume the user is logged in
   const loggedIn = !!web3;
+
+  useEffect(() => {
+    if (web3 && loading) setLoading(false);
+  }, [web3, loading]);
 
   const handleLogin = useCallback(
     async (provider: ProviderStringType) => {
