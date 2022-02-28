@@ -1,22 +1,96 @@
 import Web3 from "web3";
 import { useCallback, useEffect, useState } from "react";
-import { ProviderType } from "../../utils/types";
 import { loginWallet } from "./loginWallet";
+import type { WalletLinkProvider } from "walletlink";
+import type { EthereumProvider, ProviderStringType } from "../../utils/types";
+import type WalletConnectProvider from "@walletconnect/web3-provider";
 
 // The localstorage key for the selected provider
 // If defined, value is either 'walletlink' or 'metamask'
 const LS_KEY = "web3-provider";
 // We check the localstorage key for the provider to see if it was set during a previous session
-export const provider = window.localStorage.getItem(LS_KEY) as ProviderType;
+export const providerString = window.localStorage.getItem(
+  LS_KEY
+) as ProviderStringType;
 
 export const useWeb3 = () => {
   // This is the logged in user's Web3 Instance for the selected wallet provider
   const [web3, setWeb3] = useState<Web3>();
   // This is the logged in user's ethereum provider for the selected wallet provider
-  const [ethereum, setEthereum] = useState<typeof window.ethereum>();
+  const [provider, setProvider] = useState<EthereumProvider>();
   // This is the logged in user's selected account
   const [account, setAccount] = useState<string>();
   // This indicates the app is loading and hides all UI except the logo
+
+  const logout = useCallback(() => {
+    // Removes localstorage key that defines the wallet provider
+    localStorage.removeItem(LS_KEY);
+    // Clear out web3 and ethereum state variables
+    setProvider(undefined);
+    setWeb3(undefined);
+    setAccount(undefined);
+    // MetaMask doesn't allow for disconnection from DAPP,
+    if ((provider as WalletLinkProvider)?.isCoinbaseWallet) {
+      // Disconnect from Coinbase wallet provider
+      (provider as WalletLinkProvider)?.close();
+      return;
+    }
+    if ((provider as WalletConnectProvider)?.isWalletConnect) {
+      // Disconnect from WalletConnect provider
+      // WARNING - WalletConnect has an open issue regarding not rejecting
+      // the provider.enable promise properly when you cancel the connection from
+      // your wallet provider.
+      // https://github.com/WalletConnect/walletconnect-monorepo/issues/243
+      (provider as WalletConnectProvider)?.disconnect();
+    }
+  }, [provider]);
+
+  const login = useCallback(
+    // Accepts the user's wallet provider selection
+    // MetaMask or Coinbase Wallet
+    async (selectedProvider: ProviderStringType) => {
+      try {
+        // Calls login function, see walletlink.ts
+        const {
+          provider: loggedInProvider,
+          web3: web3Instance,
+          accounts,
+        } = await loginWallet(selectedProvider);
+        // Set the localstorage key with the selected wallet provider 'walletlink' or 'metamask'
+        // We will use this key to log the user back in automatically
+        localStorage.setItem(LS_KEY, selectedProvider);
+        // set the web3, provider, and account state variables using the
+        // resolved values from the login function
+        setProvider(loggedInProvider);
+        setWeb3(web3Instance);
+        setAccount(accounts[0]);
+      } catch {
+        // If the user cancels the request to sign in from the wallet provider
+        console.warn("FAILED TO SIGN IN!");
+        logout();
+      }
+    },
+    [logout]
+  );
+
+  const signMessage = useCallback(async () => {
+    try {
+      if (!account || !web3) {
+        throw new Error("NO ACCOUNT AVAILABLE");
+      }
+      // This will send a request to the wallet provider to sign a message
+      const signature = await web3.eth.personal.sign(
+        `Open Sesame!`,
+        account,
+        ""
+      );
+      // The signature is returned, do with it what you will
+      console.info(signature);
+    } catch (e) {
+      // This error means that user canceled the signature request
+      console.warn(e);
+    }
+  }, [web3, account]);
 
   // This runs on initial app load
   // If the user is logged in, we can listen to their wallet provider for
@@ -39,25 +113,41 @@ export const useWeb3 = () => {
       setAccount(accounts[0]);
     };
     // This listener emits when the user changes their account from their wallet provider
-    ethereum?.on("accountsChanged", listener);
+    provider?.on("accountsChanged", listener);
     return () => {
       // This cleans up the event listener
-      ethereum?.removeListener("accountsChanged", listener);
+      provider?.removeListener("accountsChanged", listener);
     };
-  }, [ethereum]);
+  }, [provider, logout]);
 
-  // This runs on initial app load
+  // This runs on initial app load and only applies to WalletConnect
+  // If the dapp is in an open browser tab when it is disconnected by the provider,
+  // this will clear out the provider localstorage key so that the user won't
+  // fall into the auto-login flow in the following useEffect.
+  useEffect(() => {
+    if (!(provider as WalletConnectProvider)?.isWalletConnect) return;
+    const listener = () => {
+      logout();
+    };
+    // This listener emits when the user changes their account from their wallet provider
+    provider?.on("disconnect", listener);
+    return () => {
+      // This cleans up the event listener
+      provider?.removeListener("disconnect", listener);
+    };
+  }, [provider, logout]);
+
+  // This runs on initial app load and only applies to Coinbase Wallet
   // If the dapp is in an open browser tab when it is disconnected by the provider,
   // this will clear out the provider localstorage key
   // so that when the page automatically reloads, the user won't fall into
   // the auto-login flow in the following useEffect.
   useEffect(() => {
-    // This only applies to Coinbase Wallet
+    if (!(provider as WalletLinkProvider)?.isCoinbaseWallet) return;
     // The Coinbase Wallet localstorage keys get cleared out, and then the page immediately reloads
     // This listener fires after the localstorage keys get cleared out, but right before the page reloads
     const listener = () => {
       if (
-        ethereum?.isCoinbaseWallet &&
         !localStorage.getItem("-walletlink:https://www.walletlink.org:version")
       ) {
         localStorage.removeItem(LS_KEY);
@@ -71,7 +161,7 @@ export const useWeb3 = () => {
       // This cleans up the event listener
       removeEventListener("beforeunload", listener);
     };
-  });
+  }, [provider]);
 
   // This runs on initial app load
   // If the user was logged in, then closes the browser tab for this dapp or reloads this tab,
@@ -79,75 +169,15 @@ export const useWeb3 = () => {
   useEffect(() => {
     // If there is no provider in localStorage, we can assume the user needs to login
     // via the login button. Otherwise...
-    if (provider) {
+    if (providerString) {
       // We call login with the provider from localstorage
-      login(provider).catch(logout);
+      login(providerString).catch(logout);
       // If this request fails, the user will be logged out
       // this should only happen if the user closes this dapp tab in the browser,
       // then disconnects from this dapp via their wallet provider,
       // then returns to this dapp
     }
   }, []);
-
-  const login = useCallback(
-    // Accepts the user's wallet provider selection
-    // MetaMask or Coinbase Wallet
-    async (provider: "walletlink" | "metamask") => {
-      try {
-        // Calls login function, see walletlink.ts
-        const { ethereum, web3: web3Instance } = await loginWallet(provider);
-        // Set the localstorage key with the selected wallet provider 'walletlink' or 'metamask'
-        // We will use this key to log the user back in automatically
-        localStorage.setItem(LS_KEY, provider);
-        // If web3 is defined, then call getAccounts and set the account state variable
-        // We display the account in the bottom of the app.
-        web3Instance?.eth.getAccounts().then((accounts: string[]) => {
-          setAccount(accounts[0]);
-        });
-        // set the web3 and ethereum state variables using the
-        // resolved values from the login function
-        setEthereum(ethereum);
-        setWeb3(web3Instance);
-      } catch {
-        // If the user cancels the request to sign in from the wallet provider
-        console.warn("FAILED TO SIGN IN!");
-      }
-    },
-    []
-  );
-
-  const logout = useCallback(() => {
-    // Removes localstorage key that defines the wallet provider
-    localStorage.removeItem(LS_KEY);
-    // Clear out web3 and ethereum state variables
-    setEthereum(undefined);
-    setWeb3(undefined);
-    setAccount(undefined);
-    if (ethereum?.isCoinbaseWallet) {
-      // Disconnect from Coinbase wallet provider
-      // MetaMask doesn't allow for disconnection from DAPP,
-      ethereum?.close();
-    }
-  }, [ethereum]);
-
-  const signMessage = useCallback(async () => {
-    try {
-      if (!account || !web3) {
-        throw new Error("NO ACCOUNT AVAILABLE");
-      }
-      // This will send a request to the wallet provider to sign a message
-      const signature = await web3.eth.personal.sign(
-        `Open Sesame!`,
-        account,
-        ""
-      );
-      // The signature is returned, do with it what you will
-      console.info(signature);
-    } catch (e) {
-      // This error means that user canceled the signature request
-      console.warn(e);
-    }
-  }, [web3, account]);
 
   return { login, logout, account, web3, signMessage };
 };

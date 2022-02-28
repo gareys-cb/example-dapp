@@ -1,15 +1,15 @@
 import Web3 from "web3";
-import { EthereumProvider, MetaMaskProvider } from "index";
-import { LoginReturnType } from "../../utils/types";
+import type { MetaMaskInpageProvider } from "@metamask/providers";
+import type { LoginReturnType } from "../../utils/types";
 
 export const loginMetaMask = async (): Promise<LoginReturnType> => {
-  const metamaskProvider: MetaMaskProvider | undefined =
-    (
-      (window.ethereum as EthereumProvider)?.providers as EthereumProvider[]
-    )?.find((p): p is MetaMaskProvider => !!p.isMetaMask) ?? window.ethereum;
+  const provider =
+    (window.ethereum as any)?.providers?.find(
+      (p: MetaMaskInpageProvider) => !!p.isMetaMask
+    ) ?? window.ethereum;
   // If the user selected MetaMask to login
   // We make sure that the user has MetaMask installed in their browser
-  if (!metamaskProvider || !metamaskProvider.isMetaMask || !window.ethereum) {
+  if (!provider || !provider.isMetaMask || !window.ethereum) {
     // If they don't have MetaMask installed, we send them over to MetaMask
     window.open("https://metamask.io/download.html", "_blank");
     // By throwing this error, the login function will fire an error 'FAILED TO SIGN IN'
@@ -22,8 +22,8 @@ export const loginMetaMask = async (): Promise<LoginReturnType> => {
   // just like the Coinbase Wallet enable() method,
   // this opens the wallet provider prompt to connect to this dapp
   // If the user was already logged in, they will not be prompted
-  await metamaskProvider.request({ method: "eth_requestAccounts" });
+  const accounts = await provider.request({ method: "eth_requestAccounts" });
   // We return the ethereum wallet provider and web3 instance for the UI to
   // know the user is logged in and ready to interact with the dapp
-  return { ethereum: metamaskProvider, web3 };
+  return { provider, web3, accounts };
 };

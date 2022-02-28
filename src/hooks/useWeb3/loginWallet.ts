@@ -1,7 +1,8 @@
 import Web3 from "web3";
-import { LoginReturnType, ProviderType } from "../../utils/types";
 import { loginCoinbaseWallet } from "./loginCoinbaseWallet";
 import { loginMetaMask } from "./loginMetaMask";
+import { loginWalletConnect } from "./loginWalletConnect";
+import type { LoginReturnType, ProviderStringType } from "../../utils/types";
 
 /**
  *
@@ -14,13 +15,15 @@ import { loginMetaMask } from "./loginMetaMask";
  * This function only returns these values if the user successfully logs in
  */
 export const loginWallet = async (
-  provider: ProviderType
+  provider: ProviderStringType
 ): Promise<LoginReturnType> => {
   switch (provider) {
     case "walletlink":
       return loginCoinbaseWallet();
     case "metamask":
       return loginMetaMask();
+    case "walletconnect":
+      return loginWalletConnect();
     default:
       // BEGIN COMMENT //
       // THIS WILL NEVER HAPPEN BECAUSE WE DON'T SUPPORT ANY OTHER WALLETS
@@ -29,8 +32,9 @@ export const loginWallet = async (
       }
 
       return {
-        ethereum: window.ethereum,
+        provider: window.ethereum,
         web3: new Web3(window.ethereum),
+        accounts: [],
       };
     // END COMMENT //
   }

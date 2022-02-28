@@ -10,6 +10,8 @@
     "lint": "yarn run eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@walletconnect/qrcode-modal": "^1.7.1",
+    "@walletconnect/web3-provider": "^1.7.1",
     "buffer": "^6.0.3",
     "process": "^0.11.10",
     "react": "^17.0.2",

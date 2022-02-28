@@ -1,20 +1,30 @@
 import { memo } from "react";
-import { ProviderType } from "../../utils/types";
+import { LoginButton } from "./LoginButton";
+import type { ProviderStringType } from "../../utils/types";
 
 type LoggedOutProps = {
-  handleLogin: (provider: ProviderType) => Promise<void>;
+  handleLogin: (selectedProvider: ProviderStringType) => Promise<void>;
 };
 
 export const LoggedOut = memo(({ handleLogin }: LoggedOutProps) => {
   return (
     <div className="content">
       <p>Sign in with your wallet</p>
-      <button type="button" onClick={() => handleLogin("walletlink")}>
-        Coinbase Wallet
-      </button>
-      <button type="button" onClick={() => handleLogin("metamask")}>
-        MetaMask Wallet
-      </button>
+      <LoginButton
+        providerString="walletlink"
+        handleLogin={handleLogin}
+        text="Coinbase Wallet"
+      />
+      <LoginButton
+        providerString="metamask"
+        handleLogin={handleLogin}
+        text="MetaMask"
+      />
+      <LoginButton
+        providerString="walletconnect"
+        handleLogin={handleLogin}
+        text="WalletConnect"
+      />
     </div>
   );
 });
