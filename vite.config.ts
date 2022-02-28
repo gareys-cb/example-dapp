@@ -11,6 +11,10 @@ export default defineConfig({
     alias: {
       util: "util",
       web3: path.resolve(__dirname, "./node_modules/web3/dist/web3.min.js"),
+      "@walletconnect/web3-provider": path.resolve(
+        __dirname,
+        "./node_modules/@walletconnect/web3-provider/dist/umd/index.min.js"
+      ),
     },
   },
   optimizeDeps: {
