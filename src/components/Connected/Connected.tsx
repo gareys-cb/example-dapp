@@ -1,14 +1,16 @@
 import { memo } from "react";
 import Web3 from "web3";
+import type { ProviderStringType } from "../../utils/types";
 
 type ConnectedProps = {
-  handleLogout: () => void;
   web3: Web3;
   account: string;
+  providerString: ProviderStringType | undefined;
+  handleLogout: () => void;
 };
 
 export const Connected = memo(
-  ({ account, web3, handleLogout }: ConnectedProps) => {
+  ({ account, web3, providerString, handleLogout }: ConnectedProps) => {
     return (
       <div className="content">
         <p>Open Sesame!</p>
@@ -23,6 +25,7 @@ export const Connected = memo(
         >
           Change Provider
         </button>
+        <small>Connected via {providerString}</small>
       </div>
     );
   }

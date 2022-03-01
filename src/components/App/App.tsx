@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import logo from "../../assets/padlock.png";
 import connectedLogo from "../../assets/padlock_open.png";
-import { providerString, useWeb3 } from "../../hooks/useWeb3/useWeb3";
+import { useWeb3 } from "../../hooks/useWeb3/useWeb3";
 import { Disconnected } from "../Disconnected/Disconnected";
 import { Connected } from "../Connected/Connected";
 import type { ProviderStringType } from "../../utils/types";
 import "./App.css";
 
 function App() {
-  const { connectProvider, changeProvider, account, web3 } = useWeb3();
+  const { connectProvider, changeProvider, providerString, account, web3 } =
+    useWeb3();
   // Controls the UI loading state which shows/hides the contents of the app
   // We will attempt to login the user if the provider is set in localStorage
   // Otherwise, we initialize it to false
@@ -62,6 +63,7 @@ function App() {
             <Connected
               web3={web3}
               account={account}
+              providerString={providerString}
               handleLogout={handleChangeProvider}
             />
           )}

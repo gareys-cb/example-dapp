@@ -32,7 +32,9 @@ export const connectCoinbaseWallet = async (): Promise<ConnectedReturnType> => {
 
   // ethereum.enable() opens the wallet provider prompt to connect to this dapp
   // If the user was already logged in, they will not be prompted
-  const accounts = await provider.enable();
+  const accounts: string[] = await provider.request({
+    method: "eth_requestAccounts",
+  });
   // We return the ethereum wallet provider and web3 instance for the UI to
   // know the user is logged in and ready to interact with the dapp
   return { provider, web3, accounts };

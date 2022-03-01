@@ -1,17 +1,11 @@
 import Web3 from "web3";
 import { useCallback, useEffect, useState } from "react";
 import { connectWithProvider } from "./connectWithProvider";
-import type { WalletLinkProvider } from "walletlink";
 import type { EthereumProvider, ProviderStringType } from "../../utils/types";
-import type WalletConnectProvider from "@walletconnect/web3-provider";
 
 // The localstorage key for the selected provider
 // If defined, value is either 'walletlink' or 'metamask'
 const LS_KEY = "web3-provider";
-// We check the localstorage key for the provider to see if it was set during a previous session
-export const providerString = window.localStorage.getItem(
-  LS_KEY
-) as ProviderStringType;
 
 export const useWeb3 = () => {
   // This is the logged in user's Web3 Instance for the selected wallet provider
@@ -20,7 +14,11 @@ export const useWeb3 = () => {
   const [provider, setProvider] = useState<EthereumProvider>();
   // This is the logged in user's selected account
   const [account, setAccount] = useState<string>();
-  // This indicates the app is loading and hides all UI except the logo
+  // We set the providerString from the localstorage key
+  // We use this to see if it was set during a previous session
+  const [providerString, setProviderString] = useState<
+    ProviderStringType | undefined
+  >(window.localStorage.getItem(LS_KEY) as ProviderStringType);
 
   const changeProvider = useCallback(() => {
     // Removes localstorage key that defines the wallet provider
@@ -59,6 +57,12 @@ export const useWeb3 = () => {
     [changeProvider]
   );
 
+  useEffect(() => {
+    setProviderString(
+      window.localStorage.getItem(LS_KEY) as ProviderStringType
+    );
+  }, [provider]);
+
   // This runs on initial app load
   // If the user is logged in, we can listen to their wallet provider for
   // the accountsChanged event. This means the user changed their
@@ -92,7 +96,6 @@ export const useWeb3 = () => {
   // this will clear out the provider localstorage key so that the user won't
   // fall into the auto-login flow in the following useEffect.
   useEffect(() => {
-    if (!(provider as WalletConnectProvider)?.isWalletConnect) return;
     const listener = () => {
       changeProvider();
     };
@@ -110,25 +113,22 @@ export const useWeb3 = () => {
   // so that when the page automatically reloads, the user won't fall into
   // the auto-login flow in the following useEffect.
   useEffect(() => {
-    if (!(provider as WalletLinkProvider)?.isCoinbaseWallet) return;
-    // The Coinbase Wallet localstorage keys get cleared out, and then the page immediately reloads
-    // This listener fires after the localstorage keys get cleared out, but right before the page reloads
-    const listener = () => {
-      if (
-        !localStorage.getItem("-walletlink:https://www.walletlink.org:version")
-      ) {
-        localStorage.removeItem(LS_KEY);
-      }
-    };
+    if (providerString !== "walletlink") {
+      // If the providerString is not walletlink, we don't want to run this listener
+      // If we did, the user would get put into a disconnected state regardless of
+      // their active provider.
+      removeEventListener("beforeunload", beforeUnloadListener);
+      return;
+    }
     // We listen to the beforeunload event to clear the localstorage provider key
     // before the page has a chance to refresh
-    addEventListener("beforeunload", listener, { capture: true });
+    addEventListener("beforeunload", beforeUnloadListener);
 
     return () => {
       // This cleans up the event listener
-      removeEventListener("beforeunload", listener);
+      removeEventListener("beforeunload", beforeUnloadListener);
     };
-  }, [provider]);
+  }, [providerString]);
 
   // This runs on initial app load
   // If the user was logged in, then closes the browser tab for this dapp or reloads this tab,
@@ -147,9 +147,16 @@ export const useWeb3 = () => {
   }, []);
 
   return {
+    providerString,
     connectProvider,
     changeProvider,
     account,
     web3,
   };
+};
+
+const beforeUnloadListener = () => {
+  if (!localStorage.getItem("-walletlink:https://www.walletlink.org:version")) {
+    localStorage.removeItem(LS_KEY);
+  }
 };
