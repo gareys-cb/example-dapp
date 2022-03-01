@@ -1,8 +1,11 @@
 import Web3 from "web3";
-import { loginCoinbaseWallet } from "./loginCoinbaseWallet";
-import { loginMetaMask } from "./loginMetaMask";
-import { loginWalletConnect } from "./loginWalletConnect";
-import type { LoginReturnType, ProviderStringType } from "../../utils/types";
+import { connectCoinbaseWallet } from "./connectors/coinbaseWallet";
+import { connectMetaMask } from "./connectors/metaMask";
+import { connectWalletConnect } from "./connectors/walletConnect";
+import type {
+  ConnectedReturnType,
+  ProviderStringType,
+} from "../../utils/types";
 
 /**
  *
@@ -14,16 +17,16 @@ import type { LoginReturnType, ProviderStringType } from "../../utils/types";
  * These state variables indicate that the user is logged in
  * This function only returns these values if the user successfully logs in
  */
-export const loginWallet = async (
+export const connectWithProvider = async (
   provider: ProviderStringType
-): Promise<LoginReturnType> => {
+): Promise<ConnectedReturnType> => {
   switch (provider) {
     case "walletlink":
-      return loginCoinbaseWallet();
+      return connectCoinbaseWallet();
     case "metamask":
-      return loginMetaMask();
+      return connectMetaMask();
     case "walletconnect":
-      return loginWalletConnect();
+      return connectWalletConnect();
     default:
       // BEGIN COMMENT //
       // THIS WILL NEVER HAPPEN BECAUSE WE DON'T SUPPORT ANY OTHER WALLETS

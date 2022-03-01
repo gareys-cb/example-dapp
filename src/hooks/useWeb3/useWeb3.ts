@@ -1,6 +1,6 @@
 import Web3 from "web3";
 import { useCallback, useEffect, useState } from "react";
-import { loginWallet } from "./loginWallet";
+import { connectWithProvider } from "./connectWithProvider";
 import type { WalletLinkProvider } from "walletlink";
 import type { EthereumProvider, ProviderStringType } from "../../utils/types";
 import type WalletConnectProvider from "@walletconnect/web3-provider";
@@ -22,75 +22,42 @@ export const useWeb3 = () => {
   const [account, setAccount] = useState<string>();
   // This indicates the app is loading and hides all UI except the logo
 
-  const logout = useCallback(() => {
+  const changeProvider = useCallback(() => {
     // Removes localstorage key that defines the wallet provider
     localStorage.removeItem(LS_KEY);
     // Clear out web3 and ethereum state variables
     setProvider(undefined);
     setWeb3(undefined);
     setAccount(undefined);
-    // MetaMask doesn't allow for disconnection from DAPP,
-    if ((provider as WalletLinkProvider)?.isCoinbaseWallet) {
-      // Disconnect from Coinbase wallet provider
-      (provider as WalletLinkProvider)?.close();
-      return;
-    }
-    if ((provider as WalletConnectProvider)?.isWalletConnect) {
-      // Disconnect from WalletConnect provider
-      // WARNING - WalletConnect has an open issue regarding not rejecting
-      // the provider.enable promise properly when you cancel the connection from
-      // your wallet provider.
-      // https://github.com/WalletConnect/walletconnect-monorepo/issues/243
-      (provider as WalletConnectProvider)?.disconnect();
-    }
   }, [provider]);
 
-  const login = useCallback(
+  const connectProvider = useCallback(
     // Accepts the user's wallet provider selection
     // MetaMask or Coinbase Wallet
     async (selectedProvider: ProviderStringType) => {
       try {
-        // Calls login function, see walletlink.ts
+        // Calls connectWallet function, see walletlink.ts
         const {
           provider: loggedInProvider,
           web3: web3Instance,
           accounts,
-        } = await loginWallet(selectedProvider);
+        } = await connectWithProvider(selectedProvider);
         // Set the localstorage key with the selected wallet provider 'walletlink' or 'metamask'
         // We will use this key to log the user back in automatically
         localStorage.setItem(LS_KEY, selectedProvider);
         // set the web3, provider, and account state variables using the
-        // resolved values from the login function
+        // resolved values from the connectWallet function
         setProvider(loggedInProvider);
         setWeb3(web3Instance);
         setAccount(accounts[0]);
       } catch {
         // If the user cancels the request to sign in from the wallet provider
         console.warn("FAILED TO SIGN IN!");
-        logout();
+        changeProvider();
       }
     },
-    [logout]
+    [changeProvider]
   );
-
-  const signMessage = useCallback(async () => {
-    try {
-      if (!account || !web3) {
-        throw new Error("NO ACCOUNT AVAILABLE");
-      }
-      // This will send a request to the wallet provider to sign a message
-      const signature = await web3.eth.personal.sign(
-        `Open Sesame!`,
-        account,
-        ""
-      );
-      // The signature is returned, do with it what you will
-      console.info(signature);
-    } catch (e) {
-      // This error means that user canceled the signature request
-      console.warn(e);
-    }
-  }, [web3, account]);
 
   // This runs on initial app load
   // If the user is logged in, we can listen to their wallet provider for
@@ -105,7 +72,7 @@ export const useWeb3 = () => {
         // This only applies to MetaMask
         // When a user disconnects this dapp using MetaMask
         // The accountsChanged returns an empty array, so we log them out.
-        logout();
+        changeProvider();
         return;
       }
       // Typically, it will only return an array with ONE address, so we get the [0] index address
@@ -118,7 +85,7 @@ export const useWeb3 = () => {
       // This cleans up the event listener
       provider?.removeListener("accountsChanged", listener);
     };
-  }, [provider, logout]);
+  }, [provider, changeProvider]);
 
   // This runs on initial app load and only applies to WalletConnect
   // If the dapp is in an open browser tab when it is disconnected by the provider,
@@ -127,7 +94,7 @@ export const useWeb3 = () => {
   useEffect(() => {
     if (!(provider as WalletConnectProvider)?.isWalletConnect) return;
     const listener = () => {
-      logout();
+      changeProvider();
     };
     // This listener emits when the user changes their account from their wallet provider
     provider?.on("disconnect", listener);
@@ -135,7 +102,7 @@ export const useWeb3 = () => {
       // This cleans up the event listener
       provider?.removeListener("disconnect", listener);
     };
-  }, [provider, logout]);
+  }, [provider, changeProvider]);
 
   // This runs on initial app load and only applies to Coinbase Wallet
   // If the dapp is in an open browser tab when it is disconnected by the provider,
@@ -171,7 +138,7 @@ export const useWeb3 = () => {
     // via the login button. Otherwise...
     if (providerString) {
       // We call login with the provider from localstorage
-      login(providerString).catch(logout);
+      connectProvider(providerString).catch(changeProvider);
       // If this request fails, the user will be logged out
       // this should only happen if the user closes this dapp tab in the browser,
       // then disconnects from this dapp via their wallet provider,
@@ -179,5 +146,10 @@ export const useWeb3 = () => {
     }
   }, []);
 
-  return { login, logout, account, web3, signMessage };
+  return {
+    connectProvider,
+    changeProvider,
+    account,
+    web3,
+  };
 };

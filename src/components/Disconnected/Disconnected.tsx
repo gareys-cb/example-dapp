@@ -1,28 +1,28 @@
 import { memo } from "react";
-import { LoginButton } from "./LoginButton";
+import { ConnectWalletButton } from "./ConnectWalletButton";
 import type { ProviderStringType } from "../../utils/types";
 
-type LoggedOutProps = {
+type DisconnectedProps = {
   handleLogin: (selectedProvider: ProviderStringType) => Promise<void>;
 };
 
-export const LoggedOut = memo(({ handleLogin }: LoggedOutProps) => {
+export const Disconnected = memo(({ handleLogin }: DisconnectedProps) => {
   return (
     <div className="content">
-      <p>Sign in with your wallet</p>
-      <LoginButton
+      <p>Connect your wallet</p>
+      <ConnectWalletButton
         providerString="walletlink"
-        handleLogin={handleLogin}
+        handleConnect={handleLogin}
         text="Coinbase Wallet"
       />
-      <LoginButton
+      <ConnectWalletButton
         providerString="metamask"
-        handleLogin={handleLogin}
+        handleConnect={handleLogin}
         text="MetaMask"
       />
-      <LoginButton
+      <ConnectWalletButton
         providerString="walletconnect"
-        handleLogin={handleLogin}
+        handleConnect={handleLogin}
         text="WalletConnect"
       />
     </div>

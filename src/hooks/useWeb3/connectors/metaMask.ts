@@ -1,8 +1,8 @@
 import Web3 from "web3";
 import type { MetaMaskInpageProvider } from "@metamask/providers";
-import type { LoginReturnType } from "../../utils/types";
+import type { ConnectedReturnType } from "../../../utils/types";
 
-export const loginMetaMask = async (): Promise<LoginReturnType> => {
+export const connectMetaMask = async (): Promise<ConnectedReturnType> => {
   const provider =
     (window.ethereum as any)?.providers?.find(
       (p: MetaMaskInpageProvider) => !!p.isMetaMask
@@ -18,7 +18,7 @@ export const loginMetaMask = async (): Promise<LoginReturnType> => {
   }
 
   // We initialize the Web3 instance
-  const web3 = new Web3(window.ethereum);
+  const web3 = new Web3(provider);
   // just like the Coinbase Wallet enable() method,
   // this opens the wallet provider prompt to connect to this dapp
   // If the user was already logged in, they will not be prompted

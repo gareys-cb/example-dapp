@@ -17,7 +17,7 @@ export type ProviderStringType = "walletlink" | "metamask" | "walletconnect";
  * @param web3 the web3 provider
  * @param accounts the accounts array
  */
-export type LoginReturnType = {
+export type ConnectedReturnType = {
   provider: EthereumProvider;
   web3: Web3;
   accounts: string[];

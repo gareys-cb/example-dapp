@@ -1,12 +1,12 @@
 import Web3 from "web3";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import type { provider } from "web3-core";
-import type { LoginReturnType } from "../../utils/types";
+import type { ConnectedReturnType } from "../../../utils/types";
 
 // Get your infura api key by creating a free account at https://infura.io/
 const INFURA_ID = "YOUR_INFURA_PROJECT_ID";
 
-export const loginWalletConnect = async (): Promise<LoginReturnType> => {
+export const connectWalletConnect = async (): Promise<ConnectedReturnType> => {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     // If the user selected Coinbase Wallet to login
@@ -28,9 +28,7 @@ export const loginWalletConnect = async (): Promise<LoginReturnType> => {
     // If the user rejects connection from their provider, this listener
     // will catch the failure.
     const disconnectListener = () => {
-      if (!shouldCallListener()) return;
-      console.log("WALLET CONNECT DISCONNECTED");
-      reject();
+      if (shouldCallListener()) reject();
     };
 
     // This starts the disconnect listener

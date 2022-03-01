@@ -40,6 +40,6 @@ button {
   font-size: 20px;
 }
 
-button.signout {
+button.change-provider {
   background-color: lightpink;
 }
