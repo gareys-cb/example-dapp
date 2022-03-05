@@ -16,7 +16,8 @@ export const ConnectWalletButton = memo(
     text,
   }: ConnectWalletButtonProps) => (
     <button type="button" onClick={() => handleConnect(providerString)}>
-      {text} {connected ? "🟢" : "🔴"}
+      <div className="provider">{text}</div>
+      <div className="connected">{connected ? "🟢" : "🔴"}</div>
     </button>
   )
 );

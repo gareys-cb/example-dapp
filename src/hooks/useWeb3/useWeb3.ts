@@ -1,7 +1,18 @@
 import Web3 from "web3";
 import { useCallback, useEffect, useState } from "react";
 import { connectWithProvider } from "./connectWithProvider";
-import type { EthereumProvider, ProviderStringType } from "../../utils/types";
+import type { EthereumProvider } from "../../utils/types";
+import type { ProviderStringType } from "../../utils/types";
+import { initCoinbaseWalletProvider } from "./connectors/coinbaseWallet";
+import { initMetaMaskProvider } from "./connectors/metaMask";
+import { initWalletConnectProvider } from "./connectors/walletConnect";
+
+// This is all of the supported provider's EthereumProviders
+export const providers = {
+  coinbase: initCoinbaseWalletProvider(),
+  metamask: initMetaMaskProvider(),
+  walletconnect: initWalletConnectProvider(),
+} as const;
 
 // The localstorage key for the selected provider
 // If defined, value is either 'coinbase', 'metamask', or 'walletconnect'
@@ -33,12 +44,16 @@ export const useWeb3 = () => {
     // Accepts the user's wallet provider selection
     // Coinbase Wallet, MetaMask, or WalletConnect
     async (selectedProvider: ProviderStringType) => {
+      if (!providers) return;
       try {
         const {
           provider: connectedProvider,
           web3: web3Instance,
           accounts,
-        } = await connectWithProvider(selectedProvider);
+        } = await connectWithProvider(
+          selectedProvider,
+          providers[selectedProvider]
+        );
         // Set the localstorage key with the selected wallet provider
         // 'coinbase', 'metamask', or 'walletconnect'
         // We will use this key to connect the user automatically
@@ -146,6 +161,7 @@ export const useWeb3 = () => {
   }, []);
 
   return {
+    providers,
     providerString,
     connectProvider,
     changeProvider,

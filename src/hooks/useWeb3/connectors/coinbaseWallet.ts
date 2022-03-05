@@ -1,11 +1,13 @@
 import Web3 from "web3";
-import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
+import CoinbaseWalletSDK, {
+  CoinbaseWalletProvider,
+} from "@coinbase/wallet-sdk";
 import {
   DEFAULT_CHAIN_ID,
   APP_NAME,
   APP_LOGO_URL,
   INFURA_RPC_URL,
-} from "../dappInfo";
+} from "../../../utils/constants";
 import type { ConnectedReturnType } from "../../../utils/types";
 
 /**
@@ -22,11 +24,14 @@ export const initCoinbaseWalletProvider = () => {
   return coinbaseWallet.makeWeb3Provider(INFURA_RPC_URL, DEFAULT_CHAIN_ID);
 };
 
-export const connectCoinbaseWallet = async (): Promise<ConnectedReturnType> => {
+export const connectCoinbaseWallet = async <
+  TProvider extends CoinbaseWalletProvider
+>(
+  provider: TProvider
+): Promise<ConnectedReturnType> => {
   // If the user selected Coinbase Wallet to connect
   // We initialize the Coinbase Wallet SDK instance and
   // we create the ethereum provider for Coinbase Wallet SDK
-  const provider = initCoinbaseWalletProvider();
   // We initialize the Web3 instance
   const web3 = new Web3(provider);
 

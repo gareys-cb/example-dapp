@@ -2,8 +2,12 @@ import Web3 from "web3";
 import { connectCoinbaseWallet } from "./connectors/coinbaseWallet";
 import { connectMetaMask } from "./connectors/metaMask";
 import { connectWalletConnect } from "./connectors/walletConnect";
+import { CoinbaseWalletProvider } from "@coinbase/wallet-sdk";
+import { MetaMaskInpageProvider } from "@metamask/providers";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 import type {
   ConnectedReturnType,
+  EthereumProvider,
   ProviderStringType,
 } from "../../utils/types";
 
@@ -18,15 +22,16 @@ import type {
  * This function only returns these values if the user successfully connects
  */
 export const connectWithProvider = async (
-  provider: ProviderStringType
+  providerString: ProviderStringType,
+  provider: EthereumProvider
 ): Promise<ConnectedReturnType> => {
-  switch (provider) {
+  switch (providerString) {
     case "coinbase":
-      return connectCoinbaseWallet();
+      return connectCoinbaseWallet(provider as CoinbaseWalletProvider);
     case "metamask":
-      return connectMetaMask();
+      return connectMetaMask(provider as MetaMaskInpageProvider);
     case "walletconnect":
-      return connectWalletConnect();
+      return connectWalletConnect(provider as WalletConnectProvider);
     default:
       // BEGIN COMMENT //
       // THIS WILL NEVER HAPPEN BECAUSE WE DON'T SUPPORT ANY OTHER WALLETS

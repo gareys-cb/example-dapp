@@ -37,9 +37,23 @@ small {
 }
 
 button {
+  cursor: pointer;
   font-size: 20px;
+  display: flex;
+  flex-direction: row;
+  align-content: space-between;
+  justify-content: center;
 }
 
 button.change-provider {
   background-color: lightpink;
+}
+
+button .provider {
+  flex: 1;
+  line-height: 28px;
+}
+
+button > div {
+  height: 28px;
 }

@@ -1,9 +1,8 @@
 import { memo } from "react";
 import { ConnectWalletButton } from "./ConnectWalletButton";
-import { initCoinbaseWalletProvider } from "../../hooks/useWeb3/connectors/coinbaseWallet";
 import type { ProviderStringType } from "../../utils/types";
-import { initMetaMaskProvider } from "../../hooks/useWeb3/connectors/metaMask";
-import { initWalletConnectProvider } from "../../hooks/useWeb3/connectors/walletConnect";
+import { providers } from "../../hooks/useWeb3/useWeb3";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 
 type DisconnectedProps = {
   handleConnect: (selectedProvider: ProviderStringType) => Promise<void>;
@@ -36,23 +35,22 @@ export const Disconnected = memo(({ handleConnect }: DisconnectedProps) => {
 });
 
 function isProviderConnected(providerString: ProviderStringType) {
+  const provider = providers[providerString];
   switch (providerString) {
     case "coinbase": {
-      const provider = initCoinbaseWalletProvider();
-      return !!provider.selectedAddress;
+      return !!provider?.selectedAddress;
     }
     case "metamask": {
-      const provider = initMetaMaskProvider();
       return (
         provider &&
         provider.isMetaMask &&
+        // @ts-expect-error checking because coinbase wallet mocks metamask
         !provider.isCoinbaseWallet &&
         !!provider.selectedAddress
       );
     }
     case "walletconnect": {
-      const provider = initWalletConnectProvider();
-      return provider.wc.connected;
+      return (provider as WalletConnectProvider).wc.connected;
     }
   }
 }

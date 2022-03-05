@@ -1,7 +1,7 @@
 import Web3 from "web3";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { INFURA_PROJECT_ID } from "../dappInfo";
-import type { provider } from "web3-core";
+import { INFURA_PROJECT_ID } from "../../../utils/constants";
+import type { provider as Provider } from "web3-core";
 import type { ConnectedReturnType } from "../../../utils/types";
 
 // Initializes the WalletConnect Provider
@@ -10,14 +10,13 @@ export const initWalletConnectProvider = () =>
     infuraId: INFURA_PROJECT_ID,
   });
 
-export const connectWalletConnect = async (): Promise<ConnectedReturnType> => {
+export const connectWalletConnect = async (
+  provider: WalletConnectProvider
+): Promise<ConnectedReturnType> => {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
-    // If the user selected WalletConnect Wallet to connect
-    // Initialize the WalletConnectProvider
-    const provider = initWalletConnectProvider();
     // We initialize the Web3 instance
-    const web3 = new Web3(provider as unknown as provider);
+    const web3 = new Web3(provider as unknown as Provider);
 
     // This controls whether or not we fire the 'disconnect' listener
     // This is because WalletConnect does not provide an removeEventListener
