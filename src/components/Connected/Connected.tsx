@@ -1,5 +1,5 @@
 import { memo } from "react";
-import Web3 from "web3";
+import type Web3 from "web3";
 import type { ProviderStringType } from "../../utils/types";
 
 type ConnectedProps = {

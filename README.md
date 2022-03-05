@@ -3,4 +3,4 @@
 
 Demo: https://gareys-cb.github.io/sesame/
 
-This dapp supports Coinbase and MetaMask wallets and allows the user to login and sign a message.
+This dapp supports Coinbase, MetaMask, and WalletConnect wallets and allows the user to connect and sign a message.

@@ -1,20 +1,20 @@
-import { useCallback, useEffect, useState } from "react";
+import "./App.css";
 import logo from "../../assets/padlock.png";
 import connectedLogo from "../../assets/padlock_open.png";
+import { useCallback, useEffect, useState } from "react";
 import { useWeb3 } from "../../hooks/useWeb3/useWeb3";
 import { Disconnected } from "../Disconnected/Disconnected";
 import { Connected } from "../Connected/Connected";
 import type { ProviderStringType } from "../../utils/types";
-import "./App.css";
 
 function App() {
   const { connectProvider, changeProvider, providerString, account, web3 } =
     useWeb3();
   // Controls the UI loading state which shows/hides the contents of the app
-  // We will attempt to login the user if the provider is set in localStorage
+  // We will attempt to connect the user if the provider is set in localStorage
   // Otherwise, we initialize it to false
   const [loading, setLoading] = useState(!!providerString);
-  // If there is web3 state, we assume the user is logged in
+  // If there is web3 state, we assume the user is connected
   const connected = !!account && !!web3;
 
   useEffect(() => {
@@ -39,10 +39,10 @@ function App() {
   const handleChangeProvider = useCallback(() => {
     // Set the UI state to loading to prevent further interaction
     setLoading(true);
-    // attempt to login via web3Hook
+    // attempt to connect via web3Hook
     changeProvider();
     // Remove the UI loading state
-    // show logged out UI state on failure
+    // show disconnected UI state on failure
     setLoading(false);
   }, [changeProvider]);
 
@@ -58,7 +58,7 @@ function App() {
         <p>loading...</p>
       ) : (
         <div>
-          {!connected && <Disconnected handleLogin={handleConnectProvider} />}
+          {!connected && <Disconnected handleConnect={handleConnectProvider} />}
           {connected && (
             <Connected
               web3={web3}
