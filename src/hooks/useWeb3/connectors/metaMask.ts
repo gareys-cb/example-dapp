@@ -6,6 +6,7 @@ import type { ConnectedReturnType } from "../../../utils/types";
  * @returns the provider for MetaMask
  */
 const initMetaMaskProvider = () =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window.ethereum as any)?.providers?.find(
     (p: MetaMaskInpageProvider) => !!p.isMetaMask
   ) ?? window.ethereum;
