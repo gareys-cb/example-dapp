@@ -13,6 +13,6 @@ git init
 git add -A
 git commit -m 'deploy'
 
-git push -f https://github.com/gareys-cb/sesame.git master:gh-pages
+git push -f https://github.com/gareys-cb/example-dapp.git master:gh-pages
 
 cd -

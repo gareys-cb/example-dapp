@@ -53,7 +53,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Sesame</h1>
+      <h1>Example Dapp</h1>
       <img
         src={connected ? connectedLogo : logo}
         className="App-logo"
@@ -69,7 +69,7 @@ function App() {
               web3={web3}
               account={account}
               providerString={providerString}
-              handleLogout={handleChangeProvider}
+              handleChangeProvider={handleChangeProvider}
             />
           )}
         </div>

@@ -6,14 +6,13 @@ type ConnectedProps = {
   web3: Web3;
   account: string;
   providerString: ProviderStringType | undefined;
-  handleLogout: () => void;
+  handleChangeProvider: () => void;
 };
 
 export const Connected = memo(
-  ({ account, web3, providerString, handleLogout }: ConnectedProps) => {
+  ({ account, web3, providerString, handleChangeProvider }: ConnectedProps) => {
     return (
       <div className="content">
-        <p>Open Sesame!</p>
         <small>Selected account: {account}</small>
         <button type="button" onClick={() => signMessage({ web3, account })}>
           Sign Message
@@ -21,7 +20,7 @@ export const Connected = memo(
         <button
           className="change-provider"
           type="button"
-          onClick={handleLogout}
+          onClick={handleChangeProvider}
         >
           Change Provider
         </button>
@@ -35,11 +34,12 @@ type SignMessageParams = { web3: Web3; account: string };
 
 const signMessage = async ({ web3, account }: SignMessageParams) => {
   try {
-    if (!account || !web3) {
-      throw new Error("NO ACCOUNT AVAILABLE");
-    }
     // This will send a request to the wallet provider to sign a message
-    const signature = await web3.eth.personal.sign(`Open Sesame!`, account, "");
+    const signature = await web3.eth.personal.sign(
+      "Example message",
+      account,
+      ""
+    );
     // The signature is returned, do with it what you will
     console.info(signature);
   } catch (e) {
