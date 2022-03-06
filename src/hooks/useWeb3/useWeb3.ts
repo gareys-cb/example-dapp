@@ -24,6 +24,7 @@ export const useWeb3 = () => {
     // Removes localstorage key that defines the wallet provider
     localStorage.removeItem(LS_KEY);
     // Clear out web3 and ethereum state variables
+    setProviderString(undefined);
     setProvider(undefined);
     setWeb3(undefined);
     setAccount(undefined);
@@ -45,6 +46,7 @@ export const useWeb3 = () => {
         localStorage.setItem(LS_KEY, selectedProvider);
         // set the web3, provider, and account state variables using the
         // resolved values from the connectWallet function
+        setProviderString(selectedProvider);
         setProvider(connectedProvider);
         setWeb3(web3Instance);
         setAccount(accounts[0]);
