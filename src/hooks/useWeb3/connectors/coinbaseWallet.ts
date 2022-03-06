@@ -9,10 +9,9 @@ import {
 import type { ConnectedReturnType } from "../../../utils/types";
 
 /**
- *
- * @returns the web3 provider for Coinbase Wallet
+ * @returns the provider for Coinbase Wallet
  */
-export const initCoinbaseWalletProvider = () => {
+const initCoinbaseWalletProvider = () => {
   const coinbaseWallet = new CoinbaseWalletSDK({
     appName: APP_NAME,
     appLogoUrl: APP_LOGO_URL,

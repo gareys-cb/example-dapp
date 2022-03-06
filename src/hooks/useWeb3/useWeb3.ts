@@ -57,12 +57,6 @@ export const useWeb3 = () => {
     [changeProvider]
   );
 
-  useEffect(() => {
-    setProviderString(
-      window.localStorage.getItem(LS_KEY) as ProviderStringType
-    );
-  }, [provider]);
-
   // This runs on initial app load
   // If the user is connected, we can listen to their wallet provider for
   // the accountsChanged event. This means the user changed their
@@ -133,6 +127,13 @@ export const useWeb3 = () => {
   // If the user was connected, then closes the browser tab for this dapp or reloads this tab,
   // then this will put them back into a connected UI state.
   useEffect(() => {
+    // Get the providerString from localStorage
+    const providerString = window.localStorage.getItem(
+      LS_KEY
+    ) as ProviderStringType;
+    // Set the providerString into react state
+    setProviderString(providerString);
+
     // If there is no provider in localStorage, we can assume the user needs to connect
     // via the connect wallet buttons. Otherwise...
     if (providerString) {

@@ -2,14 +2,17 @@ import Web3 from "web3";
 import type { MetaMaskInpageProvider } from "@metamask/providers";
 import type { ConnectedReturnType } from "../../../utils/types";
 
-// Initializes the MetaMask provider using the provider at window.ethereum
-// We will prefer a provider where the property `isMetaMask` is set to true
-export const initMetaMaskProvider = () =>
+/**
+ * @returns the provider for MetaMask
+ */
+const initMetaMaskProvider = () =>
   (window.ethereum as any)?.providers?.find(
     (p: MetaMaskInpageProvider) => !!p.isMetaMask
   ) ?? window.ethereum;
 
 export const connectMetaMask = async (): Promise<ConnectedReturnType> => {
+  // Initializes the MetaMask provider using the provider at window.ethereum
+  // We will prefer a provider where the property `isMetaMask` is set to true
   const provider = initMetaMaskProvider();
   // If the user selected MetaMask to connect
   // We make sure that the user has MetaMask installed in their browser

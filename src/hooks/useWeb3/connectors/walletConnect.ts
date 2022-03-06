@@ -4,13 +4,17 @@ import { INFURA_PROJECT_ID } from "../dappInfo";
 import type { provider } from "web3-core";
 import type { ConnectedReturnType } from "../../../utils/types";
 
-// Initializes the WalletConnect Provider
-export const initWalletConnectProvider = () =>
+/**
+ * @returns the provider for MetaMask
+ */
+const initWalletConnectProvider = () =>
   new WalletConnectProvider({
     infuraId: INFURA_PROJECT_ID,
   });
 
 export const connectWalletConnect = async (): Promise<ConnectedReturnType> => {
+  // We have to wrap the WalletConnect provider in a promise to handle
+  // when the user declines the connection
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     // If the user selected WalletConnect Wallet to connect

@@ -17,6 +17,11 @@ function App() {
   // If there is web3 state, we assume the user is connected
   const connected = !!account && !!web3;
 
+  // When the user opens your dapp after they have been connected previously
+  // we use this effect in harmony with the auto-reconnect functionality
+  // to put the user back into a connected state. The app will start in a
+  // loading state, then once auto-reconnected, will remove the loading state
+  // and drop them into the Connected UI
   useEffect(() => {
     if (connected && loading) setLoading(false);
   }, [connected, loading]);
