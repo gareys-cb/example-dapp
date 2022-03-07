@@ -1,15 +1,10 @@
 import type Web3 from "web3";
 import type { CoinbaseWalletProvider } from "@coinbase/wallet-sdk";
-import type { MetaMaskInpageProvider } from "@metamask/providers";
-import type WalletConnectProvider from "@walletconnect/web3-provider";
 
-export type EthereumProvider =
-  | CoinbaseWalletProvider
-  | MetaMaskInpageProvider
-  | WalletConnectProvider;
+export type EthereumProvider = CoinbaseWalletProvider;
 
-// Our supported wallet providers are Coinbase Wallet, MetaMask, and WalletConnect
-export type ProviderStringType = "coinbase" | "metamask" | "walletconnect";
+// Our supported wallet provider is Coinbase Wallet
+export type ProviderStringType = "coinbase";
 
 /**
  * This represents the return type of the connectProvider function, which contains

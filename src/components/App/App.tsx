@@ -8,8 +8,7 @@ import { Connected } from "../Connected/Connected";
 import type { ProviderStringType } from "../../utils/types";
 
 function App() {
-  const { connectProvider, changeProvider, providerString, account, web3 } =
-    useWeb3();
+  const { connectProvider, providerString, account, web3 } = useWeb3();
   // Controls the UI loading state which shows/hides the contents of the app
   // We will attempt to connect the user if the provider is set in localStorage
   // Otherwise, we initialize it to false
@@ -41,16 +40,6 @@ function App() {
     [connectProvider]
   );
 
-  const handleChangeProvider = useCallback(() => {
-    // Set the UI state to loading to prevent further interaction
-    setLoading(true);
-    // attempt to connect via web3Hook
-    changeProvider();
-    // Remove the UI loading state
-    // show disconnected UI state on failure
-    setLoading(false);
-  }, [changeProvider]);
-
   return (
     <div className="App">
       <h1>Example Dapp</h1>
@@ -69,7 +58,6 @@ function App() {
               web3={web3}
               account={account}
               providerString={providerString}
-              handleChangeProvider={handleChangeProvider}
             />
           )}
         </div>

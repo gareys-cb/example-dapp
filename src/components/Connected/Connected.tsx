@@ -6,23 +6,15 @@ type ConnectedProps = {
   web3: Web3;
   account: string;
   providerString: ProviderStringType | undefined;
-  handleChangeProvider: () => void;
 };
 
 export const Connected = memo(
-  ({ account, web3, providerString, handleChangeProvider }: ConnectedProps) => {
+  ({ account, web3, providerString }: ConnectedProps) => {
     return (
       <div className="content">
         <small>Selected account: {account}</small>
         <button type="button" onClick={() => signMessage({ web3, account })}>
           Sign Message
-        </button>
-        <button
-          className="change-provider"
-          type="button"
-          onClick={handleChangeProvider}
-        >
-          Change Provider
         </button>
         <small>Connected via {providerString}</small>
       </div>
