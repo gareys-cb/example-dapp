@@ -1,4 +1,3 @@
-import Web3 from "web3";
 import { connectCoinbaseWallet } from "./connectors/coinbaseWallet";
 import { connectMetaMask } from "./connectors/metaMask";
 import { connectWalletConnect } from "./connectors/walletConnect";
@@ -18,27 +17,11 @@ import type {
  * This function only returns these values if the user successfully connects
  */
 export const connectWithProvider = async (
-  provider: ProviderStringType
-): Promise<ConnectedReturnType> => {
-  switch (provider) {
-    case "coinbase":
-      return connectCoinbaseWallet();
-    case "metamask":
-      return connectMetaMask();
-    case "walletconnect":
-      return connectWalletConnect();
-    default:
-      // BEGIN COMMENT //
-      // THIS WILL NEVER HAPPEN BECAUSE WE DON'T SUPPORT ANY OTHER WALLETS
-      if (!window.ethereum) {
-        throw new Error("NO WALLET FOUND!");
-      }
+  providerString: ProviderStringType
+): Promise<ConnectedReturnType> => connectors[providerString]();
 
-      return {
-        provider: window.ethereum,
-        web3: new Web3(window.ethereum),
-        accounts: [],
-      };
-    // END COMMENT //
-  }
+const connectors = {
+  coinbase: connectCoinbaseWallet,
+  metamask: connectMetaMask,
+  walletconnect: connectWalletConnect,
 };

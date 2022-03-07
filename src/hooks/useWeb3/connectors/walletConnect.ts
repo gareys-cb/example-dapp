@@ -5,7 +5,7 @@ import type { provider } from "web3-core";
 import type { ConnectedReturnType } from "../../../utils/types";
 
 /**
- * @returns the provider for MetaMask
+ * @returns the provider for WalletConnect
  */
 const initWalletConnectProvider = () =>
   new WalletConnectProvider({
