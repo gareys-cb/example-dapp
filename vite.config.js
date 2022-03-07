@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import NodeGlobalsPolyfillPlugin from "@esbuild-plugins/node-globals-polyfill";
-const path = require("path");
 
 // https://vitejs.dev/config/
 export default defineConfig({
