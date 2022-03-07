@@ -59,10 +59,13 @@ export const useWeb3 = () => {
     [changeProvider]
   );
 
-  // This runs on initial app load
-  // If the user is connected, we can listen to their wallet provider for
-  // the accountsChanged event. This means the user changed their
-  // active/selected wallet address while they were connected to the DAPP.
+  /**
+   * Accounts Changed and MetaMask Disconnect Effect
+   * ***********************************************
+   * If the user is connected, we can listen to their wallet provider for
+   * the accountsChanged event. This means the user changed their
+   * active/selected wallet address while they were connected to the DAPP.
+   */
   useEffect(() => {
     // I will use account/address interchangeably in these comments
     // This listener provides an array of address strings when it calls back
@@ -74,7 +77,7 @@ export const useWeb3 = () => {
         changeProvider();
         return;
       }
-      // Typically, it will only return an array with ONE address, so we get the [0] index address
+      // Typically, it will only return an array with ONE address, so we get accounts[0]
       // We set the new active account to display it in the UI
       setAccount(accounts[0]);
     };
@@ -86,10 +89,14 @@ export const useWeb3 = () => {
     };
   }, [provider, changeProvider]);
 
-  // This runs on initial app load and only applies to WalletConnect
-  // If the dapp is in an open browser tab when it is disconnected by the provider,
-  // this will clear out the provider localstorage key so that the user won't
-  // fall into the auto-connect flow.
+  /**
+   * WalletConnect Disconnect Effect
+   * ************************************************
+   * This only applies to WalletConnect
+   * If the dapp is in an open browser tab when it is disconnected by the provider,
+   * this will clear out the provider localstorage key so that the user won't
+   * fall into the auto-connect flow.
+   */
   useEffect(() => {
     const listener = () => {
       changeProvider();
@@ -102,12 +109,25 @@ export const useWeb3 = () => {
     };
   }, [provider, changeProvider]);
 
-  // This runs on initial app load and only applies to Coinbase Wallet
-  // If the dapp is in an open browser tab when it is disconnected by the provider,
-  // this will clear out the provider localstorage key
-  // so that when the page automatically reloads, the user won't fall into
-  // the auto-connect flow.
+  /**
+   * Coinbase Wallet Disconnect Effect
+   * ************************************************
+   * This only applies to Coinbase Wallet
+   * If the dapp is in an open browser tab when it is disconnected by the provider,
+   * this will clear out the provider localstorage key so that when the
+   * page automatically reloads, the user won't fall into the auto-connect flow.
+   */
   useEffect(() => {
+    // The listener function for the onbeforeunload event that lets us clean up
+    // state when the user disconnects the dapp from their Coinbase Wallet
+    const beforeUnloadListener = () => {
+      if (
+        !localStorage.getItem("-walletlink:https://www.walletlink.org:version")
+      ) {
+        localStorage.removeItem(LS_KEY);
+      }
+    };
+
     if (providerString !== "coinbase") {
       // If the providerString is not 'coinbase', we don't want to run this listener
       // If we did, the user would get put into a disconnected state regardless of
@@ -125,10 +145,13 @@ export const useWeb3 = () => {
     };
   }, [providerString]);
 
-  // This runs on initial app load
-  // If the user was connected, then closes the browser tab for this dapp or reloads this tab,
-  // then this will put them back into a connected UI state.
-  useEffect(() => {
+  /**
+   * Auto-Reconnect Effect
+   *
+   * If the user was connected, then closes the browser tab for this dapp or
+   * reloads this tab, then this will put them back into a connected UI state.
+   */
+  useEffect(function autoReconnectEffect() {
     // Get the providerString from localStorage
     const providerString = window.localStorage.getItem(
       LS_KEY
@@ -155,12 +178,4 @@ export const useWeb3 = () => {
     account,
     web3,
   };
-};
-
-// The listener function for the onbeforeunload event that lets us clean up
-// state when the user disconnects the dapp from their Coinbase Wallet
-const beforeUnloadListener = () => {
-  if (!localStorage.getItem("-walletlink:https://www.walletlink.org:version")) {
-    localStorage.removeItem(LS_KEY);
-  }
 };

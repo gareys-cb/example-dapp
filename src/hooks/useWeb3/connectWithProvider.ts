@@ -7,20 +7,21 @@ import type {
 } from "../../utils/types";
 
 /**
+ * @param providerString 'coinbase', 'metamask', or 'walletconnect'
+ * @returns `{ provider, web3, accounts }`
  *
- * @param provider the provider string: 'coinbase', 'metamask', or 'walletconnect'
- * @returns ethereum - the wallet provider object
- * @returns web3 - the web3 provider
- *
- * When we call this in the UI, we set the web3 and provider state variables
- * These state variables indicate that the user is connected
  * This function only returns these values if the user successfully connects
  */
 export const connectWithProvider = async (
   providerString: ProviderStringType
 ): Promise<ConnectedReturnType> => connectors[providerString]();
 
-const connectors = {
+// An object where the key is a providerString
+// and the value is the associated provider's connector function
+const connectors: Record<
+  ProviderStringType,
+  () => Promise<ConnectedReturnType>
+> = {
   coinbase: connectCoinbaseWallet,
   metamask: connectMetaMask,
   walletconnect: connectWalletConnect,
